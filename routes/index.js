@@ -51,25 +51,31 @@ router.get('/callback', function (req, res) {
   function saveToken(error, result) {
     if (error) { console.log('Access Token Error', error.message); }
     // token = oauth2.accessToken.create(result);
-		console.log(result)
+
 		token = queryString.parse(result).access_token;
 
 		// authentication
 		github.authenticate({
 			type:"oauth",
-			token: token
-		})
-
-		console.log(token)
+			//token: token
+			// for local dev
+			token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
+		});
 
 		// get username and redirect to user page
 		github.user.get({},function(err, data){
-			console.log(data.name)
 			res.redirect('/user/'+ data.name)
 		})
 
   }
 });
+
+// for local dev
+github.authenticate({
+	type:"oauth",
+	token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
+});
+
 
 router.get('/', function (req, res) {
 	res.render('index')
@@ -80,12 +86,33 @@ router.get('/user/:username', function(req,res){
 	res.render('user')
 })
 
+// list repos owned by this user
 router.get('/repos', function(req, res){
 	github.repos.getAll({
 		type:'owner'
 	},function(err,data){
-    res.json(data)
+    	res.json(data)
 	})
-})
+});
+
+router.get('/punchcard', function(req, res){
+	github.repos.getStatsPunchCard({
+		user: 'fengshuo',
+		repo: 'd3-basic-charts'
+	},function(err,data){
+		if(err){
+			res.send(err)
+		}
+
+		res.json(data)
+	})
+
+});
+
+
+
+
+
+
 
 module.exports = router;
