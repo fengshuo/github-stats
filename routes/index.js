@@ -84,14 +84,13 @@ router.get('/user/:username', function(req,res){
 	res.render('user')
 })
 
-// list repos owned by this user
-router.get('/repos', function(req, res){
-	github.repos.getAll({
-		type:'owner'
-	},function(err,data){
-    	res.json(data)
-	})
-});
+
+/**
+ * PunchCard
+ */
+router.get('/puchcard-page', function(req,res){
+	res.render('punchcard')
+})
 
 router.get('/punchcard', function(req, res){
 	github.repos.getStatsPunchCard({
@@ -104,8 +103,39 @@ router.get('/punchcard', function(req, res){
 
 		res.json(data)
 	})
-
 });
+
+
+/**
+ * Code Frequency
+ */
+router.get('/codefrequency-page', function(req,res){
+	res.render('codefrequency')
+})
+
+router.get('/codefrequency', function(req, res){
+	github.repos.getStatsCodeFrequency({
+		user: 'fengshuo',
+		repo: 'd3-basic-charts'
+	},function(err,data){
+		if(err){
+			res.send(err)
+		}
+		res.json(data)
+	})
+});
+
+
+// list repos owned by this user
+router.get('/repos', function(req, res){
+	github.repos.getAll({
+		type:'owner'
+	},function(err,data){
+    	res.json(data)
+	})
+});
+
+
 
 
 

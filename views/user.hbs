@@ -5,108 +5,25 @@
 	<script src="/js/lib/jquery.min.js"></script>
     <script src="/js/lib/d3.js"></script>
     <style>
-
+        body{
+            font:10px arial;
+        }
         .axis path,
         .axis line{
             fill:none;
             stroke:#000;
         }
 
-        .area{
-            fill:steelblue;
-        }
+        .sum.axis line{
+			display: none;
+		}
 
-        .line{
-            fill:none;
-            stroke: orange;
-            stroke-width: 3px;
-        }
+		.sum.axis path{
+			display: none;
+		}
+
 	</style>
 </head>
 <body>
-	<h1>PunchCard</h1>
-    <script>
-		window.onload = function(){
-			// d3 settings
-			var margin = {
-				top:10,
-				right:30,
-				bottom: 10,
-				left:15
-			};
-
-			var width = 900 - margin.left - margin.right;
-			var height = 800 - margin.top - margin.bottom;
-
-			var svg = d3.select("body").append("svg")
-					.attr({
-						"width": width+margin.left+margin.right,
-						"height": height+margin.top+margin.bottom
-					})
-					.append("g")
-					.attr("transform","translate("+margin.left+","+margin.right+")");
-
-			var xScale = d3.scale.ordinal()
-					.rangeRoundBands([0,width],0.1);
-
-			var xAxis = d3.svg.axis()
-					.scale(xScale)
-					.orient("bottom");
-
-
-			d3.json('http://localhost:3030/punchcard',function(err,json){
-				if(err) throw err;
-				//console.log(json);
-				var data = d3.nest()
-						.key(function(d){
-							return d[0]
-						}).entries(json)
-
-				xScale.domain(d3.range(0,24));
-				// now data is grouped by day
-				var dayGroup = svg.selectAll(".day")
-						.data(data)
-						.enter()
-                        .append("g")
-						.attr({
-							width: width,
-							height: 90
-						})
-
-						.attr("transform", function(d,i){
-							return "translate(0,"+ i*100 + ")";
-						})
-						.attr("class","day")
-
-
-				dayGroup.selectAll(".dot")
-						.data(function(d){
-							return d.values;
-						})
-						.enter()
-						.append("circle")
-						.attr({
-							"r": function(d){
-								return d[2]*5;
-							},
-							"cx": function(d){
-								return xScale(d[1]);
-							},
-							"cy": function(d){
-								return 30;
-							}
-						})
-
-				dayGroup.append("g")
-                        .attr("class","x axis")
-                        .attr("transform", "translate(0,80)")
-                        .call(xAxis)
-
-
-
-			})
-
-		};
-	</script>
-
+	<h1>user</h1>
 </body>
