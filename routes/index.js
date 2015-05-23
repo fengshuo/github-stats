@@ -57,9 +57,7 @@ router.get('/callback', function (req, res) {
 		// authentication
 		github.authenticate({
 			type:"oauth",
-			//token: token
-			// for local dev
-			token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
+			token: token
 		});
 
 		// get username and redirect to user page
@@ -71,10 +69,10 @@ router.get('/callback', function (req, res) {
 });
 
 // for local dev
-github.authenticate({
-	type:"oauth",
-	token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
-});
+//github.authenticate({
+//	type:"oauth",
+//	token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
+//});
 
 
 router.get('/', function (req, res) {
