@@ -68,11 +68,7 @@ router.get('/callback', function (req, res) {
   }
 });
 
-// for local dev
-//github.authenticate({
-//	type:"oauth",
-//	token: '563d396f30680e1ad11ee11ee7984b2444ee2413'
-//});
+
 
 
 router.get('/', function (req, res) {
@@ -95,7 +91,7 @@ router.get('/puchcard-page', function(req,res){
 router.get('/punchcard', function(req, res){
 	github.repos.getStatsPunchCard({
 		user: 'fengshuo',
-		repo: 'd3-basic-charts'
+		repo: 'fengshuo.github.io'
 	},function(err,data){
 		if(err){
 			res.send(err)
@@ -116,7 +112,26 @@ router.get('/codefrequency-page', function(req,res){
 router.get('/codefrequency', function(req, res){
 	github.repos.getStatsCodeFrequency({
 		user: 'fengshuo',
-		repo: 'd3-basic-charts'
+		repo: 'fengshuo.github.io'
+	},function(err,data){
+		if(err){
+			res.send(err)
+		}
+		res.json(data)
+	})
+});
+
+/**
+ * Commit Activity
+ */
+router.get('/commit-page', function(req,res){
+	res.render('commit')
+})
+
+router.get('/commit', function(req, res){
+	github.repos.getStatsCommitActivity({
+		user: 'fengshuo',
+		repo: 'fengshuo.github.io'
 	},function(err,data){
 		if(err){
 			res.send(err)
