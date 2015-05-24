@@ -59,14 +59,14 @@
 
 
             var xScale = d3.scale.ordinal()
-					.rangeRoundBands([0,width],.1,0) // remove outerpadding by the thrid parameter
+					.rangeRoundBands([0,width],.1,0); // remove outerpadding by the thrid parameter
 
             var timeParse = d3.time.format("%x").parse;
 
 			/**
-			 * TODO:
-			 * adjust xAxis style based on data?
+			 * TODO: adjust xAxis style based on data?
 			 */
+
 
 			var xAxis = d3.svg.axis()
 					.scale(xScale)
@@ -93,7 +93,8 @@
             paramsArr = paramsArr.split('/');
             paramsArr.shift();
             paramsArr.pop()
-            var params = '?username=' + paramsArr[1] + '&repo=' + paramsArr[2];
+            var params = '?username=' + paramsArr[1] + '&repo=' + paramsArr[2]; // TODO
+
 
 			d3.json('http://localhost:3030/codefrequency'+params,function(err,json){
 				if(err) throw err;
@@ -107,8 +108,8 @@
 				json.forEach(function(d){
 					var date = new Date(d[0]*1000);
 					var formatter = d3.time.format("%x");
-					d[0] = formatter(date)
-					xDomain.push(d[0]);
+					d[0] = formatter(date);
+					xDomain.push(d[0]); // TODO: use d3.time.scale?
 				});
 
 				// update scale
@@ -120,7 +121,6 @@
 					d3.max(json, function(d){
 						return d[1];
 					})
-
 				]);
 
 
@@ -133,14 +133,14 @@
 								return xScale(d[0])
 							},
 							"y": function(d){
-								return  yScale(d[1]);
+								return  yScale(d[1]); // be careful on bar chart, it's very likely to confuse the height with y pos
 							},
 							"height": function(d){
 								return yScale(0) - yScale(d[1])
 							},
 							"width": xScale.rangeBand()
 						})
-						.attr("class","add")
+						.attr("class","add");
 
 				svg.selectAll(".delete")
 						.data(json)
@@ -158,7 +158,7 @@
                             },
                             "width": xScale.rangeBand()
                         })
-                        .attr("class","delete")
+                        .attr("class","delete");
 
 
 				// axis
@@ -166,13 +166,13 @@
 						.attr("transform","translate(0,"+ yScale(0) + ")")
 						.attr("class","x axis")
 						.call(xAxis)
-						.selectAll("text")
+						.selectAll("text") // rotate axis labels
 						.attr({
 							'text-anchor': 'end',
 							'dx': '-1.55em',
 							'dy': '0.15em',
 							'transform': 'rotate(-90)'
-						})
+						});
 
                 svg.append("g")
                         .attr("class","y axis")
@@ -201,7 +201,7 @@
                         });
 
 				svg2.append("path")
-						.datum(json)
+						.datum(json)// if enter(),exit() selection is not needed, use datum is also fine.
 						.attr("d", areaGeneratorAdd)
 						.attr("class","add-area")
 

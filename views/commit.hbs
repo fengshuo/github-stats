@@ -77,6 +77,8 @@
 
 			var timeParse = d3.time.format("%x").parse;
 
+			// TODO: reusebility of Scales and Axis
+
 			var barXAxis = d3.svg.axis()
 					.scale(barXScale)
 					.orient("bottom")
@@ -102,6 +104,7 @@
             var lineYScale = d3.scale.linear()
                     .range([sectionHeight, 0]);
 
+			// Use dispatch to sync views
 
 			var dispatch = d3.dispatch("load", "statechange");
 			var data;
@@ -140,7 +143,7 @@
 				])
 
 
-//				TODO: Why it's not working????
+//				!TODO: Why it's not working???????
 //				data = d3.map(json, function(d){
 //					return d.week;
 //				});
@@ -150,7 +153,7 @@
                             return d.week
                         })
 						.rollup(function(d){
-						  return d[0]
+						  return d[0]; // use rollup to handle rest of the data
 						})
 						.entries(json);
 
@@ -159,7 +162,8 @@
 				 * http://bl.ocks.org/mbostock/5872848
 				 */
 
-				// initiate, pass date by week
+				// initiate
+				// TODO: should be using week as passing parameter
 				dispatch.load(data[data.length-1]);
 				//dispatch.statechange(data[data.length-1])
 			})
@@ -184,7 +188,7 @@
 							},
 							"width": barXScale.rangeBand()
 						})
-					// ad hoc to initiate statechange:bar
+					// ad hoc to initiate statechange:bar for latest day
 						.style("fill", function(d,i){
 							return i==(data.length-1) ? "red" : "black";
 						})
@@ -199,12 +203,13 @@
 						.attr({
 							"dx": "-0.8em",
 							"dy": "0.15em"
-						})
+						});
 
 
 				// use param bind statechange to the latest day
 				dispatch.statechange(param);
 				// bind click events
+				// TODO: Control Siblings in d3?
 				bars.on("click", function(d){
 					d3.selectAll(".bar").classed("active",false);
 					dispatch.statechange(d);
@@ -249,7 +254,7 @@
 
 				var line = svgLine
 						.append("path")
-						.attr("d", lineGenerator(weekday)) // notice how to pass data to generator
+						.attr("d", lineGenerator(weekday)) // notice how to pass data to generator d attribute
 						.attr("class", "week-line");
 
 
@@ -260,13 +265,13 @@
 
                 dispatch.on("statechange.line", function(param){
 
-					dots.data(param.values.days) // update data before transiton
+					dots.data(param.values.days) // update data before transition
 							.transition()
 							.duration(1000)
 							.delay(200)
 							.attr("cy", function(d){
 								return lineYScale(d)
-							})
+							});
 
 					line.transition()
                             .duration(1000)

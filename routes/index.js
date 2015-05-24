@@ -20,6 +20,7 @@ var github = new GitHubApi({
     timeout: 5000
 });
 
+
 /* oauth process
 * http://andreareginato.github.io/simple-oauth2/#coding-guidelines
 */
@@ -140,10 +141,11 @@ router.get('/codefrequency', function(req, res){
 		if(err){
 			res.send(err)
 		}
-		console.log(data)
 		res.json(data)
 	})
 });
+
+
 
 /**
  * Commit Activity
