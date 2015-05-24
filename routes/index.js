@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
+var qs = require('query-string');
 
 // dependencies
 var GitHubApi = require("github");
@@ -69,34 +71,55 @@ router.get('/callback', function (req, res) {
 });
 
 
-
+/**
+ * Route and Api
+ */
 
 router.get('/', function (req, res) {
 	res.render('index')
 });
 
-router.get('/user/:username', function(req,res){
+router.get('/user/:username/', function(req,res){
 	// console.log(req.params.username)
 	res.render('user')
+});
+
+/**
+ * Get Repos of this User (owned by this user)
+ */
+router.get('/getrepos', function(req, res){
+	github.repos.getAll({
+		type:'owner'
+	},function(err,data){
+		if(err){res.send(err)};
+
+		res.json(data)
+	})
+});
+
+/**
+ * Chart Page Entry Point
+ */
+router.get('/user/:username/:repo/', function(req, res){
+	res.render("entry-page")
 })
 
 
 /**
  * PunchCard
  */
-router.get('/puchcard-page', function(req,res){
+router.get('/user/:username/:repo/punchcard-page', function(req,res){
 	res.render('punchcard')
 })
 
 router.get('/punchcard', function(req, res){
 	github.repos.getStatsPunchCard({
-		user: 'fengshuo',
-		repo: 'fengshuo.github.io'
+		user: req.query.username,
+		repo: req.query.repo
 	},function(err,data){
 		if(err){
 			res.send(err)
 		}
-
 		res.json(data)
 	})
 });
@@ -105,18 +128,19 @@ router.get('/punchcard', function(req, res){
 /**
  * Code Frequency
  */
-router.get('/codefrequency-page', function(req,res){
+router.get('/user/:username/:repo/codefrequency-page', function(req,res){
 	res.render('codefrequency')
 })
 
 router.get('/codefrequency', function(req, res){
 	github.repos.getStatsCodeFrequency({
-		user: 'fengshuo',
-		repo: 'fengshuo.github.io'
+		user: req.query.username,
+		repo: req.query.repo
 	},function(err,data){
 		if(err){
 			res.send(err)
 		}
+		console.log(data)
 		res.json(data)
 	})
 });
@@ -124,14 +148,14 @@ router.get('/codefrequency', function(req, res){
 /**
  * Commit Activity
  */
-router.get('/commit-page', function(req,res){
+router.get('/user/:username/:repo/commit-page', function(req,res){
 	res.render('commit')
 })
 
 router.get('/commit', function(req, res){
 	github.repos.getStatsCommitActivity({
-		user: 'fengshuo',
-		repo: 'fengshuo.github.io'
+		user: req.query.username,
+		repo: req.query.repo
 	},function(err,data){
 		if(err){
 			res.send(err)
@@ -141,14 +165,6 @@ router.get('/commit', function(req, res){
 });
 
 
-// list repos owned by this user
-router.get('/repos', function(req, res){
-	github.repos.getAll({
-		type:'owner'
-	},function(err,data){
-    	res.json(data)
-	})
-});
 
 
 

@@ -24,8 +24,6 @@
 			fill: red;
 		}
 
-
-
 	</style>
 </head>
 <body>
@@ -37,7 +35,7 @@
 				top:50,
 				right:30,
 				bottom: 10,
-				left:50
+				left:80
 			};
 
 			var width = 900 - margin.left - margin.right;
@@ -61,11 +59,28 @@
 
 
             var xScale = d3.scale.ordinal()
-					.rangeRoundBands([0,width],.5,0); // remove outerpadding by the thrid parameter
+					.rangeRoundBands([0,width],.1,0) // remove outerpadding by the thrid parameter
+
+            var timeParse = d3.time.format("%x").parse;
+
+			/**
+			 * TODO:
+			 * adjust xAxis style based on data?
+			 */
 
 			var xAxis = d3.svg.axis()
 					.scale(xScale)
-					.orient("top");
+					.orient("top")
+                    .innerTickSize(0)
+                    .tickFormat(function(d){
+                        return d3.time.format("%m/%d")(timeParse(d))
+                    })
+			// usage of tickValues:
+			// http://bl.ocks.org/mbostock/3212294
+			// but not suitable in this case
+//					.tickValues(xScale.domain().filter(function(d,i){
+//						return !(i%2)
+//					}))
 
 			var yScale = d3.scale.linear()
 					.range([height, 0]);
@@ -74,7 +89,13 @@
 					.scale(yScale)
 					.orient("left");
 
-			d3.json('http://localhost:3030/codefrequency',function(err,json){
+            var paramsArr = $(location).attr('pathname');
+            paramsArr = paramsArr.split('/');
+            paramsArr.shift();
+            paramsArr.pop()
+            var params = '?username=' + paramsArr[1] + '&repo=' + paramsArr[2];
+
+			d3.json('http://localhost:3030/codefrequency'+params,function(err,json){
 				if(err) throw err;
 
 				/**
@@ -102,6 +123,7 @@
 
 				]);
 
+
 				svg.selectAll(".add")
 						.data(json)
 						.enter()
@@ -111,10 +133,10 @@
 								return xScale(d[0])
 							},
 							"y": function(d){
-								return yScale(0) - yScale(d[1]);
+								return  yScale(d[1]);
 							},
 							"height": function(d){
-								return yScale(d[1])
+								return yScale(0) - yScale(d[1])
 							},
 							"width": xScale.rangeBand()
 						})
@@ -143,7 +165,14 @@
 				svg.append("g")
 						.attr("transform","translate(0,"+ yScale(0) + ")")
 						.attr("class","x axis")
-						.call(xAxis);
+						.call(xAxis)
+						.selectAll("text")
+						.attr({
+							'text-anchor': 'end',
+							'dx': '-1.55em',
+							'dy': '0.15em',
+							'transform': 'rotate(-90)'
+						})
 
                 svg.append("g")
                         .attr("class","y axis")

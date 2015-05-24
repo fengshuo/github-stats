@@ -5,25 +5,31 @@
 	<script src="/js/lib/jquery.min.js"></script>
     <script src="/js/lib/d3.js"></script>
     <style>
-        body{
-            font:10px arial;
-        }
-        .axis path,
-        .axis line{
-            fill:none;
-            stroke:#000;
-        }
-
-        .sum.axis line{
-			display: none;
-		}
-
-		.sum.axis path{
-			display: none;
-		}
 
 	</style>
 </head>
 <body>
-	<h1>user</h1>
+	<h1>select one repo</h1>
+    <select name="repo" id="selectRepo">
+	</select>
+    <a href="#" id="btn">Go</a>
+    <script>
+		window.onload = function(){
+			//TODO: save result
+			$.get("http://localhost:3030/getrepos", function(data){
+				// NOTE: Only use repos created by user
+				data.map(function(d){
+					if(!d.fork){
+						$("#selectRepo").append("<option value="+ d.name +">"+ d.name+"</option>")
+					}
+				});
+
+				$("#selectRepo").change(function(e){
+					var _this = $(this);
+					var repo = _this.val();
+					$("#btn").attr("href", $(location).attr('href') +'/'+repo)
+				});
+			})
+		}
+	</script>
 </body>

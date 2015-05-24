@@ -63,7 +63,17 @@
 					})
 					.outerTickSize(0) //remove the tick on both side
 
-			d3.json('http://localhost:3030/punchcard',function(err,json){
+			/**
+			 * Handle Request Param
+			 */
+
+            var paramsArr = $(location).attr('pathname');
+            paramsArr = paramsArr.split('/');
+            paramsArr.shift();
+			paramsArr.pop()
+			var params = '?username=' + paramsArr[1] + '&repo=' + paramsArr[2];
+
+			d3.json('http://localhost:3030/punchcard'+params,function(err,json){
 				if(err) throw err;
 				//console.log(json);
 				var data = d3.nest()
