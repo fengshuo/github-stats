@@ -89,11 +89,12 @@ router.get('/user/:username/', function(req,res){
  * Get Repos of this User (owned by this user)
  */
 router.get('/getrepos', function(req, res){
-	github.repos.getAll({
-		type:'owner'
+	github.repos.getFromUser({
+		type:'owner',
+    per_page: 100,
+    user: 'mbostock'
 	},function(err,data){
 		if(err){res.send(err)};
-
 		res.json(data)
 	})
 });
@@ -167,7 +168,10 @@ router.get('/commit', function(req, res){
 });
 
 
-
+// repo popularity
+router.get('/user/:username/repos/popularity', function(req,res){
+  res.render('repo-popularity')
+})
 
 
 

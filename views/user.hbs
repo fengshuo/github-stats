@@ -10,11 +10,12 @@
 </head>
 <body>
 	<h1>select one repo</h1>
-    <select name="repo" id="selectRepo">
-	</select>
+    <select name="repo" id="selectRepo"></select>
     <a href="#" id="btn">Go</a>
+		<a href="#" id="repo">Populatiry</a>
     <script>
 		window.onload = function(){
+			$("#repo").attr("href", $(location).attr("href")+'/repos/popularity');
 			//TODO: save result
 			$.get("http://localhost:3030/getrepos", function(data){
 				// NOTE: Only use repos created by user
