@@ -16,6 +16,11 @@
 		right: 0;
 	}
 
+	.svg-donut {
+		position: absolute;
+		top: 950px;
+	}
+
 	.svg-bar-ctrl {
 		position: absolute;
 		left: 30px;
@@ -51,6 +56,9 @@
 		var width = 900 - margin.left - margin.right;
 		var height = 500 - margin.top - margin.bottom;
 
+		/**
+		 * bar chart setting
+		 */
 		var svg = d3.select("body").append("svg")
 					.attr({
 						"width": width + margin.left + margin.right,
@@ -59,6 +67,7 @@
 					.attr("class", "svg-bar")
 					.append("g")
 					.attr("transform", "translate("+margin.left+","+margin.right+")");
+
 
 		// scale
 		var xScale = d3.scale.linear()
@@ -76,8 +85,42 @@
 								.scale(yScale)
 								.orient("left");
 
+		/**
+		 * donut chart setting
+		 */
+		var svgPie = d3.select("body")
+									.append("svg")
+									.attr({
+										"width": width,
+										"height": height
+									})
+									.attr("class","svg-donut")
+									.append("g")
+									.attr("transform", "translate("+width/2+","+height/2+")");
+
+		var arcGenerator = d3.svg.arc()
+											.innerRadius(100)
+											.outerRadius(200);
+
+		var donutLayout = d3.layout.pie()
+										.value(function(d){
+											return d.count;
+										});
+
+
+
+		/*
+		 * load data
+		 */
 		d3.json('http://localhost:3030/othersRepo', function(err,json){
 			console.log(json);
+			/**
+			 * Filter data
+			 * 1. original data, json: pie chart of forked VS created
+			 * 2. bar chart data, data: repo created by user
+			 */
+
+			/* bar chart data*/
 			// reorganize data
 			var data = [];
 			// filter repo created by user;
@@ -86,11 +129,32 @@
 					data.push(j)
 				}
 			});
-
 			// sort first
 			data.sort(function(a,b){
 				return a.forks_count >= b.forks_count ? 1 : -1;
 			});
+
+			/* donut chart data*/
+			var donutData = [
+				{
+					type:'forked',
+					count:0
+				},
+				{
+					type:'created',
+					count:0
+				}
+			];
+
+			json.forEach(function(j){
+				if(j.fork){
+					donutData[0].count++;
+				}else {
+					donutData[1].count++;
+				}
+			});
+
+
 
 			// update scale
 			xScale.domain([
@@ -133,8 +197,6 @@
 				.attr("class","y axis")
 				.call(yAxis);
 
-
-
 			// change event listener
 			d3.select(".metric").on("change", function(){
 				var val = this.value;
@@ -144,7 +206,7 @@
 						return d[val];
 					})
 				]).copy();
-				
+
 				var xAxisCopy = d3.svg.axis()
 												.scale(xScaleCopy)
 												.orient("bottom");
@@ -162,8 +224,37 @@
 						.duration(1000)
 						.call(xAxisCopy)
 
-
 			});
+
+
+			// draw donut chart
+			var donut = svgPie.selectAll(".arc")
+					 				.data(donutLayout(donutData))
+									.enter()
+									.append("g")
+									.attr("class","donut-arc");
+
+			donut.append("path")
+						.attr("d", arcGenerator)
+						.style("fill", function(d,i){
+							if(i==0){
+								return "pink";
+							}else {
+								return "steelblue"
+							}
+						});
+
+			// add labels to donut
+			donut.append("text")
+						.attr("transform", function(d){
+							return "translate(" + arcGenerator.centroid(d) + ")";
+						})
+						.attr("text-anchor", "middle")
+						.text(function(d){
+							// after processed with layout, the data adhere to selection is different
+							return d.data.count;
+						})
+
 
 
 		});
