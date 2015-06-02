@@ -10,37 +10,62 @@
 		fill:none;
 		stroke:#000;
 	}
+
+	.svg-bar {
+		position: absolute;
+		right: 0;
+	}
+
+	.svg-bar-ctrl {
+		position: absolute;
+		left: 30px;
+		width: 100px;
+	}
+
+	.svg-bar-ctrl input {
+		display: block;
+	}
+
 	</style>
 </head>
 <body>
+
+<div class="svg-bar-ctrl">
+	<select class="metric" name="metric">
+		<option value="forks_count" selected="selected">forks</option>
+		<option value="stargazers_count">stargazers</option>
+		<option value="watchers_count">watchers</option>
+		<option value="open_issues_count">issues</option>
+	</select>
+</div>
 
 <script type="text/javascript">
 	window.onload = function(){
 		var margin = {
 			top:30,
 			right:30,
-			bottom:150,
-			left:50
+			bottom:50,
+			left:250
 		};
 
 		var width = 900 - margin.left - margin.right;
-		var height = 600 - margin.top - margin.bottom;
+		var height = 500 - margin.top - margin.bottom;
 
 		var svg = d3.select("body").append("svg")
 					.attr({
 						"width": width + margin.left + margin.right,
 						"height": height + margin.top + margin.bottom
 					})
-					.attr("class", "svg")
+					.attr("class", "svg-bar")
 					.append("g")
 					.attr("transform", "translate("+margin.left+","+margin.right+")");
 
 		// scale
-		var xScale = d3.scale.ordinal()
-									.rangeRoundBands([0,width], .3);
+		var xScale = d3.scale.linear()
+								.range([0, width]);
 
-		var yScale = d3.scale.linear()
-								.range([height,0]);
+		var yScale = d3.scale.ordinal()
+									.rangeRoundBands([0,height], .3);
 
 		// axis
 		var xAxis = d3.svg.axis()
@@ -52,6 +77,7 @@
 								.orient("left");
 
 		d3.json('http://localhost:3030/othersRepo', function(err,json){
+			console.log(json);
 			// reorganize data
 			var data = [];
 			// filter repo created by user;
@@ -66,16 +92,15 @@
 				return a.forks_count >= b.forks_count ? 1 : -1;
 			});
 
-
 			// update scale
-			yScale.domain([
+			xScale.domain([
 				0,
 				d3.max(data, function(d){
 					return d.forks_count;
 				})
 			]);
 
-			xScale.domain(data.map(function(d){
+			yScale.domain(data.map(function(d){
 				return d.name;
 			}))
 
@@ -86,16 +111,16 @@
 									.enter()
 								.append("rect")
 									.attr({
-										"x": function(d){
-											return xScale(d.name);
-										},
+										"x": 0,
 										"y": function(d){
-											return yScale(d.forks_count)
+											return yScale(d.name);
 										},
 										"height": function(d){
-											return height - yScale(d.forks_count);
+											return yScale.rangeBand();
 										},
-										"width": xScale.rangeBand()
+										"width": function(d){
+											return xScale(d.forks_count);
+										}
 									});
 
 			// render axis
@@ -103,15 +128,42 @@
 				.attr("class","x axis")
 				.attr("transform","translate(0," + height +")")
 				.call(xAxis)
-				.selectAll("text")
-					.attr("transform", "rotate(-90)")
-					.style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
 
 		  svg.append("g")
 				.attr("class","y axis")
 				.call(yAxis);
+
+
+
+			// change event listener
+			d3.select(".metric").on("change", function(){
+				var val = this.value;
+				var xScaleCopy = xScale.domain([
+					0,
+					d3.max(data, function(d){
+						return d[val];
+					})
+				]).copy();
+				
+				var xAxisCopy = d3.svg.axis()
+												.scale(xScaleCopy)
+												.orient("bottom");
+
+				groups.transition()
+					.duration(1000)
+					.attr({
+						"width": function(d){
+							return xScaleCopy(d[val])
+						}
+					});
+
+				// update domain as well
+				svg.select(".x.axis").transition()
+						.duration(1000)
+						.call(xAxisCopy)
+
+
+			});
 
 
 		});
