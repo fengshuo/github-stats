@@ -34,7 +34,7 @@ var oauth2 = require('simple-oauth2')({
 // Authorization uri definition
 var authorization_uri = oauth2.authCode.authorizeURL({
   redirect_uri: 'http://localhost:3030/callback',
-  scope: 'notifications,user,public_repo',
+  scope: 'user,public_repo',
   state: '3(#0/!~'
 });
 
@@ -81,103 +81,34 @@ router.get('/', function (req, res) {
 });
 
 router.get('/user/:username/', function(req,res){
-	// console.log(req.params.username)
-	res.render('user')
+	res.render('user-page')
 });
 
 /**
- * Get Repos of this User (owned by this user)
+ * Authenticated User Stats
  */
-router.get('/getrepos', function(req, res){
-	github.repos.getFromUser({
+
+
+/**
+ * Other User Stats
+ */
+var otherName;
+router.get('/others/', function (req, res) {
+  otherName = req.query.name;
+  res.render('others-page')
+});
+
+
+router.get('/othersRepo', function(req,res){
+  github.repos.getFromUser({
 		type:'owner',
     per_page: 100,
-    user: 'mbostock'
+    user: otherName
 	},function(err,data){
 		if(err){res.send(err)};
 		res.json(data)
 	})
-});
-
-/**
- * Chart Page Entry Point
- */
-router.get('/user/:username/:repo/', function(req, res){
-	res.render("entry-page")
 })
-
-
-/**
- * PunchCard
- */
-router.get('/user/:username/:repo/punchcard-page', function(req,res){
-	res.render('punchcard')
-})
-
-router.get('/punchcard', function(req, res){
-	github.repos.getStatsPunchCard({
-		user: req.query.username,
-		repo: req.query.repo
-	},function(err,data){
-		if(err){
-			res.send(err)
-		}
-		res.json(data)
-	})
-});
-
-
-/**
- * Code Frequency
- */
-router.get('/user/:username/:repo/codefrequency-page', function(req,res){
-	res.render('codefrequency')
-})
-
-router.get('/codefrequency', function(req, res){
-	github.repos.getStatsCodeFrequency({
-		user: req.query.username,
-		repo: req.query.repo
-	},function(err,data){
-		if(err){
-			res.send(err)
-		}
-		res.json(data)
-	})
-});
-
-
-
-/**
- * Commit Activity
- */
-router.get('/user/:username/:repo/commit-page', function(req,res){
-	res.render('commit')
-})
-
-router.get('/commit', function(req, res){
-	github.repos.getStatsCommitActivity({
-		user: req.query.username,
-		repo: req.query.repo
-	},function(err,data){
-		if(err){
-			res.send(err)
-		}
-		res.json(data)
-	})
-});
-
-
-// repo popularity
-router.get('/user/:username/repos/popularity', function(req,res){
-  res.render('repo-popularity')
-})
-
-
-
-
-
-
 
 
 module.exports = router;

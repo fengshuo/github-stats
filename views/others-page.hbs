@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8"/>
+  <title>others page</title>
+	<script src="/js/lib/jquery.min.js"></script>
+  <script src="/js/lib/d3.js"></script>
+  <style>
+	.axis path,
+	.axis line{
+		fill:none;
+		stroke:#000;
+	}
+	</style>
+</head>
+<body>
+
+<script type="text/javascript">
+	window.onload = function(){
+		var margin = {
+			top:30,
+			right:30,
+			bottom:150,
+			left:50
+		};
+
+		var width = 900 - margin.left - margin.right;
+		var height = 600 - margin.top - margin.bottom;
+
+		var svg = d3.select("body").append("svg")
+					.attr({
+						"width": width + margin.left + margin.right,
+						"height": height + margin.top + margin.bottom
+					})
+					.attr("class", "svg")
+					.append("g")
+					.attr("transform", "translate("+margin.left+","+margin.right+")");
+
+		// scale
+		var xScale = d3.scale.ordinal()
+									.rangeRoundBands([0,width], .3);
+
+		var yScale = d3.scale.linear()
+								.range([height,0]);
+
+		// axis
+		var xAxis = d3.svg.axis()
+								.scale(xScale)
+								.orient("bottom");
+
+		var yAxis = d3.svg.axis()
+								.scale(yScale)
+								.orient("left");
+
+		d3.json('http://localhost:3030/othersRepo', function(err,json){
+			// reorganize data
+			var data = [];
+			// filter repo created by user;
+			json.forEach(function(j){
+				if(!j.fork){
+					data.push(j)
+				}
+			});
+
+			// sort first
+			data.sort(function(a,b){
+				return a.forks_count >= b.forks_count ? 1 : -1;
+			});
+
+
+			// update scale
+			yScale.domain([
+				0,
+				d3.max(data, function(d){
+					return d.forks_count;
+				})
+			]);
+
+			xScale.domain(data.map(function(d){
+				return d.name;
+			}))
+
+			var groups = svg.selectAll(".bars")
+									.data(data, function(d){
+										return d.name;
+									})
+									.enter()
+								.append("rect")
+									.attr({
+										"x": function(d){
+											return xScale(d.name);
+										},
+										"y": function(d){
+											return yScale(d.forks_count)
+										},
+										"height": function(d){
+											return height - yScale(d.forks_count);
+										},
+										"width": xScale.rangeBand()
+									});
+
+			// render axis
+			svg.append("g")
+				.attr("class","x axis")
+				.attr("transform","translate(0," + height +")")
+				.call(xAxis)
+				.selectAll("text")
+					.attr("transform", "rotate(-90)")
+					.style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+
+		  svg.append("g")
+				.attr("class","y axis")
+				.call(yAxis);
+
+
+		});
+
+	}
+</script>
+</body>

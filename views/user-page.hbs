@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8"/>
+  	<title>user page</title>
+	<script src="/js/lib/jquery.min.js"></script>
+    <script src="/js/lib/d3.js"></script>
+    <style>
+
+	</style>
+</head>
+<body>
+	<h1>see your repo data</h1>
+	<input type="text" placeholder="see other ppl" id="name">
+	<button id="btn">GO</button>
+	<script>
+		window.onload = function(){
+			$("#btn").click(function(e){
+				if(!$("#name").val()){
+					alert("need username")
+				}else {
+					$(location).attr("href", "/others?name="+ $("#name").val())
+				}
+			})
+		}
+	</script>
+</body>
