@@ -1,5 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://apis.google.com/js/client.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+</head>
+<body>
+<h1>test</h1>
+<script type="text/javascript">
+window.onload = function(){
+	var googObj = googObj || {};
+
+	(function($) {
+	googObj.bigQuery = {
+
+			projectNumber: 'vibrant-tiger-95306',
+			clientId: '260878465288-3vdku6f83pvc5ndhs2edvf10h0vur2t0.apps.googleusercontent.com',
+
+			initAuth: function() {
+					var config = {
+						'client_id': '260878465288-3vdku6f83pvc5ndhs2edvf10h0vur2t0.apps.googleusercontent.com',
+						'scope': 'https://www.googleapis.com/auth/bigquery'
+					};
+
+					gapi.auth.authorize(config, function() {
+							gapi.client.load('bigquery', 'v2');
+					});
+
+			},
+
+			getData: function() {
+					var request = gapi.client.bigquery.jobs.query({
+							'projectId': 'vibrant-tiger-95306',
+							'timeoutMs': '30000',
+							'query': 'SELECT * FROM [publicdata:samples.github_timeline] LIMIT 10;'
+					});
+
+					request.execute(function(response) {
+						console.log('dddd')
+						console.log(response)
+							//$('#result_box').html(JSON.stringify(response.result.rows, null));
+					});
+			},
+
+			init: function() {
+					setTimeout( function() {
+								googObj.bigQuery.initAuth();
+					}, 500);
+
+					setTimeout(function(){
+						googObj.bigQuery.getData()
+					}, 5000)
+			}
+	}
+	})(jQuery);
+
+	jQuery(document).ready(function($) {
+		googObj.bigQuery.init();
+	});
+}
 
 
-<h1>
-	<a href="auth">Log in </a>
-</h1>
+</script>
+
+</body>
+</html>

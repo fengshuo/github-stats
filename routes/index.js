@@ -44,16 +44,16 @@ router.get('/auth', function (req, res) {
 router.get('/oauthcallback', function(req, res){
   var code = req.query.code;
   console.log(code)
-  oauth2Client.getToken(code, function(err, tokens) {
-    // Now tokens contains an access_token and an optional refresh_token. Save them.
-    if(!err) {
-      console.log(tokens)
-      oauth2Client.setCredentials(tokens);
-    }
-
-  })
-
-  res.redirect('/test')
+  // oauth2Client.getToken(code, function(err, tokens) {
+  //   // Now tokens contains an access_token and an optional refresh_token. Save them.
+  //   if(!err) {
+  //     console.log(tokens)
+  //     oauth2Client.setCredentials(tokens);
+  //   }
+  //
+  // })
+  //
+  // res.redirect('/test')
 
 });
 
