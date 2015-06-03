@@ -4,7 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var qs = require('query-string');
 
-
 /*
  * Create a consent page URL
  */
@@ -12,9 +11,10 @@ var google = require('googleapis');
 var OAuth2 = google.auth.OAuth2;
 var bigquery = google.bigquery('v2');
 
+
 var CLIENT_ID = '260878465288-3vdku6f83pvc5ndhs2edvf10h0vur2t0.apps.googleusercontent.com';
 var CLIENT_SECRET = 'NhEqYRV_R9aMXH37apgc9jKj';
-var REDIRECT_URL = 'https://localhost:3030/oauthcallback';
+var REDIRECT_URL = 'http://localhost:3030/oauthcallback';
 
 var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 
@@ -43,17 +43,18 @@ router.get('/auth', function (req, res) {
  */
 router.get('/oauthcallback', function(req, res){
   var code = req.query.code;
-  console.log(code)
-  // oauth2Client.getToken(code, function(err, tokens) {
-  //   // Now tokens contains an access_token and an optional refresh_token. Save them.
-  //   if(!err) {
-  //     console.log(tokens)
-  //     oauth2Client.setCredentials(tokens);
-  //   }
-  //
-  // })
-  //
-  // res.redirect('/test')
+  console.log("code is "+code)
+
+  oauth2Client.getToken(code, function(error, tokens) {
+    if (error) {
+        console.log('Error while trying to retrieve access token', err);
+        return;
+    }
+    var accessToken = tokens.access_token
+    oauth2Client.setCredentials({
+      access_token: accessToken
+    });
+  });
 
 });
 
@@ -67,6 +68,8 @@ router.get('/test', function(req,res){
   }, function(err, data){
     console.log(data)
   })
+
+
 
 })
 
