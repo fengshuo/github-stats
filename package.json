@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.12.4",
     "github": "^0.2.4",
+    "googleapis": "^2.0.4",
     "hbs": "^3.0.1",
     "query-string": "^2.1.0",
     "simple-oauth2": "^0.2.1"

@@ -2,112 +2,72 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var path = require('path');
-var url = require('url');
 var qs = require('query-string');
 
-// dependencies
-var GitHubApi = require("github");
-var queryString = require('query-string');
 
-// more info here:
-// https://github.com/mikedeboer/node-github
-
-var github = new GitHubApi({
-    version: "3.0.0", // required
-    debug: true, // optional
-    protocol: "https",
-    host: "api.github.com",
-    timeout: 5000
-});
-
-
-/* oauth process
-* http://andreareginato.github.io/simple-oauth2/#coding-guidelines
-*/
-var oauth2 = require('simple-oauth2')({
-  clientID: '6431287130e627dd6e06',
-  clientSecret: '645a37b74e34c2651e08ef8fa454c2d160c8d861',
-  site: 'https://github.com/login',
-  tokenPath: '/oauth/access_token'
-});
-
-// Authorization uri definition
-var authorization_uri = oauth2.authCode.authorizeURL({
-  redirect_uri: 'http://localhost:3030/callback',
-  scope: 'user,public_repo',
-  state: '3(#0/!~'
-});
-
-// Initial page redirecting to Github
-router.get('/auth', function (req, res) {
-    res.redirect(authorization_uri);
-});
-
-// Callback service parsing the authorization token and asking for the access token
-router.get('/callback', function (req, res) {
-  var code = req.query.code;
-  oauth2.authCode.getToken({
-    code: code,
-    redirect_uri: 'http://localhost:3030/callback'
-  }, saveToken);
-
-  function saveToken(error, result) {
-    if (error) { console.log('Access Token Error', error.message); }
-    // token = oauth2.accessToken.create(result);
-
-		token = queryString.parse(result).access_token;
-
-		// authentication
-		github.authenticate({
-			type:"oauth",
-			token: token
-		});
-
-		// get username and redirect to user page
-		github.user.get({},function(err, data){
-			res.redirect('/user/'+ data.name)
-		})
-
-  }
-});
-
-
-/**
- * Route and Api
+/*
+ * Create a consent page URL
  */
+var google = require('googleapis');
+var OAuth2 = google.auth.OAuth2;
+var bigquery = google.bigquery('v2');
+
+var CLIENT_ID = '260878465288-3vdku6f83pvc5ndhs2edvf10h0vur2t0.apps.googleusercontent.com';
+var CLIENT_SECRET = 'NhEqYRV_R9aMXH37apgc9jKj';
+var REDIRECT_URL = 'https://localhost:3030/oauthcallback';
+
+var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+
+// set auth as a global default
+google.options({ auth: oauth2Client });
+
+// generate a url that asks permissions for Google+ and Google Calendar scopes
+
+var authorization_url = oauth2Client.generateAuthUrl({
+  access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
+  scope: 'https://www.googleapis.com/auth/bigquery' // If you only need one scope you can pass it as string
+});
 
 router.get('/', function (req, res) {
 	res.render('index')
 });
 
-router.get('/user/:username/', function(req,res){
-	res.render('user-page')
+// Initial page redirecting
+router.get('/auth', function (req, res) {
+    res.redirect(authorization_url);
 });
 
-/**
- * Authenticated User Stats
+/*
+ * Retrive authorization code
+ * Retrive access token
  */
+router.get('/oauthcallback', function(req, res){
+  var code = req.query.code;
+  console.log(code)
+  oauth2Client.getToken(code, function(err, tokens) {
+    // Now tokens contains an access_token and an optional refresh_token. Save them.
+    if(!err) {
+      console.log(tokens)
+      oauth2Client.setCredentials(tokens);
+    }
 
+  })
 
-/**
- * Other User Stats
- */
-var otherName;
-router.get('/others/', function (req, res) {
-  otherName = req.query.name;
-  res.render('others-page')
+  res.redirect('/test')
+
 });
 
 
-router.get('/othersRepo', function(req,res){
-  github.repos.getFromUser({
-		type:'owner',
-    per_page: 100,
-    user: otherName
-	},function(err,data){
-		if(err){res.send(err)};
-		res.json(data)
-	})
+router.get('/test', function(req,res){
+
+  var request = bigquery.jobs.query({
+    'projectId': 'vibrant-tiger-95306',
+    'timeoutMs': '30000',
+    'query': 'SELECT * FROM [publicdata:samples.github_timeline] LIMIT 2;'
+  }, function(err, data){
+    console.log(data)
+  })
+
 })
 
 
