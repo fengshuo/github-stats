@@ -47,10 +47,11 @@ router.get('/oauthcallback', function(req, res){
 
   oauth2Client.getToken(code, function(error, tokens) {
     if (error) {
-        console.log('Error while trying to retrieve access token', err);
+        console.log('Error while trying to retrieve access token', error);
         return;
     }
-    var accessToken = tokens.access_token
+    var accessToken = tokens.access_token;
+
     oauth2Client.setCredentials({
       access_token: accessToken
     });
